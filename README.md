@@ -1,5 +1,17 @@
 # MeTube
 
+## Customize
+
+### 変更点
+
+- ツイキャスのパスワード付き配信に対応
+
+### TODO
+
+- format, lint
+
+-----
+
 ![Build Status](https://github.com/alexta69/metube/actions/workflows/main.yml/badge.svg)
 ![Docker Pulls](https://img.shields.io/docker/pulls/alexta69/metube.svg)
 
