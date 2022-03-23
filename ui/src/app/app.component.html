@@ -24,7 +24,10 @@
     <div class="container add-url-box">
       <div class="row">
         <div class="col add-url-component input-group">
-          <input type="text" class="form-control" placeholder="Video or playlist URL" name="addUrl" [(ngModel)]="addUrl" [disabled]="addInProgress || downloads.loading">
+      <div class="row">
+        <div class="col add-url-component input-group">
+          <input type="text" class="form-control" placeholder="Video Password" name="videoPassword"
+            [(ngModel)]="videoPassword" [disabled]="addInProgress || downloads.loading">
         </div>
       </div>
       <div class="row">

@@ -6,7 +6,7 @@ RUN npm ci && \
     node_modules/.bin/ng build --prod
 
 
-FROM python:3.8-alpine
+FROM python:3.10-alpine
 
 WORKDIR /app
 

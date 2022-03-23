@@ -79,7 +79,8 @@ async def add(request):
     if not url or not quality:
         raise web.HTTPBadRequest()
     format = post.get('format')
-    status = await dqueue.add(url, quality, format)
+    videopassword = post.get('videopassword')
+    status = await dqueue.add(url, quality, format, videopassword=videopassword)
     return web.Response(text=serializer.encode(status))
 
 @routes.post(config.URL_PREFIX + 'delete')

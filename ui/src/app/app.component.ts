@@ -18,6 +18,7 @@ export class AppComponent implements AfterViewInit {
   qualities: Quality[];
   quality: string;
   format: string;
+  videoPassword: string;
   addInProgress = false;
   darkMode: boolean;
 
@@ -114,13 +115,14 @@ export class AppComponent implements AfterViewInit {
     this.quality = exists ? this.quality : 'best'
   }
 
-  addDownload(url?: string, quality?: string, format?: string) {
+  addDownload(url?: string, quality?: string, format?: string, videoPassword?: string) {
     url = url ?? this.addUrl
     quality = quality ?? this.quality
     format = format ?? this.format
+    videoPassword = videoPassword ?? this.videoPassword
 
     this.addInProgress = true;
-    this.downloads.add(url, quality, format).subscribe((status: Status) => {
+    this.downloads.add(url, quality, format, videoPassword).subscribe((status: Status) => {
       if (status.status === 'error') {
         alert(`Error adding URL: ${status.msg}`);
       } else {
@@ -130,8 +132,8 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
-  retryDownload(key: string, url: string, quality: string, format: string) {
-    this.addDownload(url, quality, format);
+  retryDownload(key: string, url: string, quality: string, format: string, videoPassword: string) {
+    this.addDownload(url, quality, format, videoPassword);
     this.downloads.delById('done', [key]).subscribe();
   }
 

@@ -205,7 +205,7 @@ class DownloadQueue:
             **self.config.YTDL_OPTIONS,
         }).extract_info(url, download=False)
 
-    async def __add_entry(self, entry, quality, format, already):
+    async def __add_entry(self, entry, quality, format, already, videopassword):
         etype = entry.get('_type') or 'video'
         if etype == 'playlist':
             entries = entry['entries']
@@ -218,7 +218,8 @@ class DownloadQueue:
                 for property in ("id", "title", "uploader", "uploader_id"):
                     if property in entry:
                         etr[f"playlist_{property}"] = entry[property]
-                results.append(await self.__add_entry(etr, quality, format, already))
+                # ツイキャスで playlist をダウンロードすることは無さそうだけど
+                results.append(await self.__add_entry(etr, quality, format, already, videopassword))
             if any(res['status'] == 'error' for res in results):
                 return {'status': 'error', 'msg': ', '.join(res['msg'] for res in results if res['status'] == 'error' and 'msg' in res)}
             return {'status': 'ok'}
@@ -230,15 +231,23 @@ class DownloadQueue:
                 for property, value in entry.items():
                     if property.startswith("playlist"):
                         output = output.replace(f"%({property})s", str(value))
-                self.queue.put(Download(dldirectory, output, quality, format, self.config.YTDL_OPTIONS, dl))
+                # videopassword は動的に設定したいので
+                # https://github.com/yt-dlp/yt-dlp/blob/af14914baac50c7969bfd4fd9741cb5f4250c0e7/yt_dlp/YoutubeDL.py#L199
+                # 雑に空文字にする
+                # --video-password="" でも動作するので良しとする
+                if videopassword is None:
+                    videopassword = ""
+                self.queue.put(Download(dldirectory, output,
+                               quality, format, self.config.YTDL_OPTIONS | {"videopassword": videopassword}, dl))
                 self.event.set()
                 await self.notifier.added(dl)
             return {'status': 'ok'}
         elif etype.startswith('url'):
-            return await self.add(entry['url'], quality, format, already)
+            # どういう条件？不明だが、一応 password を与えておく
+            return await self.add(entry['url'], quality, format, already, videopassword)
         return {'status': 'error', 'msg': f'Unsupported resource "{etype}"'}
 
-    async def add(self, url, quality, format, already=None):
+    async def add(self, url, quality, format, already=None, videopassword=None):
         log.info(f'adding {url}')
         already = set() if already is None else already
         if url in already:
@@ -250,7 +259,7 @@ class DownloadQueue:
             entry = await asyncio.get_running_loop().run_in_executor(None, self.__extract_info, url)
         except yt_dlp.utils.YoutubeDLError as exc:
             return {'status': 'error', 'msg': str(exc)}
-        return await self.__add_entry(entry, quality, format, already)
+        return await self.__add_entry(entry, quality, format, already, videopassword)
 
     async def cancel(self, ids):
         for id in ids:

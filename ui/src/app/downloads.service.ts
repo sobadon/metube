@@ -81,8 +81,8 @@ export class DownloadsService {
     return of({status: 'error', msg: msg})
   }
 
-  public add(url: string, quality: string, format: string) {
-    return this.http.post<Status>('add', {url: url, quality: quality, format: format}).pipe(
+  public add(url: string, quality: string, format: string, videoPassword: string) {
+    return this.http.post<Status>('add', { url: url, quality: quality, format: format, videoPassword: videoPassword }).pipe(
       catchError(this.handleHTTPError)
     );
   }
